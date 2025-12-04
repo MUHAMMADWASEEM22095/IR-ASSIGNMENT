@@ -1,26 +1,52 @@
 import re
 import time
+import os
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-CORPUS = [
-    "Information retrieval systems are designed to retrieve relevant documents from a large collection.",
-    "Text mining often involves analyzing patterns and extracting valuable insights from unstructured data.",
-    "The Vector Space Model (VSM) represents documents and queries as vectors in a high-dimensional space.",
-    "TF-IDF is a numerical statistic used to reflect how important a word is to a document in a corpus.",
-    "A well-designed IR system must prioritize both precision and recall in its ranking of results."
-]
 
-DOCUMENT_TITLES = [
-    "IR System Introduction",
-    "Basics of Text Mining",
-    "Understanding the Vector Space Model",
-    "The Importance of TF-IDF",
-    "Evaluation Metrics in IR"
-]
+CORPUS_DIR = 'corpus_data'
 
+# The following lists will be populated by the file loading function.
+CORPUS = []
+DOCUMENT_TITLES = []
 
+def load_corpus_from_disk(directory):
+    """
+    Loads all text files from a specified directory into the CORPUS and DOCUMENT_TITLES lists.
+    """
+    print(f"Loading documents from directory: {directory}")
+    local_corpus = []
+    local_titles = []
+    
+    # Check if the directory exists
+    if not os.path.isdir(directory):
+        print(f"Error: Directory '{directory}' not found. Please create it and place your text files inside.")
+        return [], []
+
+    # Iterate through all files in the directory
+    for filename in os.listdir(directory):
+        # We only want to process text files (assuming .txt extension)
+        if filename.endswith('.txt'):
+            filepath = os.path.join(directory, filename)
+            try:
+                # Open and read the entire content of the file
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    
+                    # Add the file content to the corpus
+                    local_corpus.append(content)
+                    
+                    # Use the filename (without extension) as the document title
+                    title = filename.replace('.txt', '')
+                    local_titles.append(title)
+                
+            except Exception as e:
+                print(f"Could not read file {filename}. Error: {e}")
+                
+    print(f"Successfully loaded {len(local_corpus)} documents.")
+    return local_corpus, local_titles
 class TFIDF_IR_System:
     def __init__(self, corpus, titles):
         
